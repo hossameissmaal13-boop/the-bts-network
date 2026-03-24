@@ -13,6 +13,8 @@ import {
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LanguageContext } from '../src/utils/LanguageContext';
 
+const BASE_URL = "https://the-bts-network-production.up.railway.app/api";
+
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,6 +24,7 @@ export default function Login({ navigation }) {
   const [langDropdown, setLangDropdown] = useState(false);
 
   const { language, setLanguage, translations } = useContext(LanguageContext);
+  const t = translations[language] || translations.fr;
 
   const languages = [
     { code: 'fr', label: 'Français' },
@@ -29,22 +32,20 @@ export default function Login({ navigation }) {
     { code: 'ar', label: 'العربية' }
   ];
 
-  // ✅ تنظيف الإيمايل فقط
   const cleanEmail = (value) => {
     return value.trim().replace(/\s+/g, '').toLowerCase();
   };
 
-  // ✅ LOGIN FUNCTION
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Fill all fields");
+      Alert.alert(t.error, t.fillAllFields || "Fill all fields");
       return;
     }
 
     const emailCleaned = cleanEmail(email);
 
     try {
-      const res = await fetch("http://192.168.1.3:5000/api/auth/login", {
+      const res = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -62,19 +63,19 @@ export default function Login({ navigation }) {
       try {
         data = JSON.parse(text);
       } catch (e) {
-        Alert.alert("Error", "Server returned invalid data");
+        Alert.alert(t.error, "Server returned invalid data");
         return;
       }
 
       if (data.success) {
-        navigation.replace("Welcome");
+        navigation.replace("Welcome", { student: data.student });
       } else {
-        Alert.alert("Error", data.message || "Email or password invalid");
+        Alert.alert(t.error, data.message || "Email or password invalid");
       }
 
     } catch (error) {
       console.log("❌ LOGIN ERROR:", error);
-      Alert.alert("Error", "Server error");
+      Alert.alert(t.error, t.serverProblem || "Server error");
     }
   };
 
@@ -87,7 +88,6 @@ export default function Login({ navigation }) {
         contentContainerStyle={styles.container} 
         keyboardShouldPersistTaps="handled"
       >
-
         {/* TOP ICONS */}
         <View style={styles.topIcons}>
           <TouchableOpacity onPress={() => setLangDropdown(!langDropdown)}>
@@ -106,7 +106,10 @@ export default function Login({ navigation }) {
               <TouchableOpacity
                 key={l.code}
                 style={styles.langBtn}
-                onPress={() => { setLanguage(l.code); setLangDropdown(false); }}
+                onPress={() => { 
+                  setLanguage(l.code); 
+                  setLangDropdown(false); 
+                }}
               >
                 <Text>{l.label}</Text>
               </TouchableOpacity>
@@ -118,12 +121,12 @@ export default function Login({ navigation }) {
         <View style={styles.center}>
           <MaterialCommunityIcons name="school" size={90} color="#2e86de" />
 
-          <Text style={styles.title}>{translations[language].loginTitle}</Text>
-          <Text style={styles.subtitle}>{translations[language].loginSubtitle}</Text>
+          <Text style={styles.title}>{t.loginTitle}</Text>
+          <Text style={styles.subtitle}>{t.loginSubtitle}</Text>
 
           {/* EMAIL */}
           <TextInput
-            placeholder={translations[language].gmailPlaceholder}
+            placeholder={t.gmailPlaceholder}
             style={[styles.input, { borderColor: focusEmail ? '#2e86de' : '#ddd' }]}
             value={email}
             onChangeText={setEmail}
@@ -136,7 +139,7 @@ export default function Login({ navigation }) {
           {/* PASSWORD */}
           <View style={[styles.passBox, { borderColor: focusPass ? '#2e86de' : '#ddd' }]}>
             <TextInput
-              placeholder={translations[language].passwordPlaceholder}
+              placeholder={t.passwordPlaceholder}
               secureTextEntry={!showPass}
               style={{ flex: 1 }}
               value={password}
@@ -153,7 +156,7 @@ export default function Login({ navigation }) {
           {/* LOGIN */}
           <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
             <Text style={styles.loginText}>
-              {translations[language].connect}
+              {t.connect}
             </Text>
           </TouchableOpacity>
 
@@ -163,22 +166,20 @@ export default function Login({ navigation }) {
             style={{ alignItems: "center", marginTop: 15 }}
           >
             <Text style={{ color: '#2e86de', fontWeight: '500' }}>
-              {translations[language]?.forgotPassword || "Mot de passe oublié ?"}
+              {t.forgotPassword || "Mot de passe oublié ?"}
             </Text>
           </TouchableOpacity>
-
         </View>
 
-        {/* CREATE ACCOUNT (لتحت) */}
+        {/* CREATE ACCOUNT */}
         <View style={styles.footer}>
-          <Text>{translations[language].noAccountText} </Text>
+          <Text>{t.noAccountText} </Text>
           <TouchableOpacity onPress={() => navigation.navigate('RegisterStep1')}>
             <Text style={styles.create}>
-              {translations[language].createAccount}
+              {t.createAccount}
             </Text>
           </TouchableOpacity>
         </View>
-
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -203,11 +204,18 @@ const styles = StyleSheet.create({
     top: 70, 
     left: 25, 
     width: 140, 
-    backgroundColor: '#fff', 
-    borderWidth: 1 
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    zIndex: 10
   },
 
-  langBtn: { padding: 10 },
+  langBtn: { 
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee'
+  },
 
   center: { 
     alignItems: 'center',

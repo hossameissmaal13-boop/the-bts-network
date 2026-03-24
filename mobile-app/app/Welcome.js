@@ -1,12 +1,15 @@
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-export default function Welcome({ navigation }) {
+export default function Welcome({ navigation, route }) {
+  const student = route?.params?.student;
 
   useEffect(() => {
-    setTimeout(() => {
-      navigation.replace("Home");
+    const timer = setTimeout(() => {
+      navigation.replace("Home", { student });
     }, 2000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (

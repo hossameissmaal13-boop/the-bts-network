@@ -52,27 +52,23 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    console.log("📥 LOGIN DATA:", { email, password }); // 👈 هنا
+    const cleanEmail = email.trim().replace(/\s+/g, "").toLowerCase();
 
-    const cleanEmail = email.trim().replace(/\s+/g, '').toLowerCase();
-
-    console.log("📧 CLEAN EMAIL:", cleanEmail); // 👈 هنا
+    console.log("📥 LOGIN DATA:", { email, password });
+    console.log("📧 CLEAN EMAIL:", cleanEmail);
 
     const student = await Student.findOne({ email: cleanEmail });
 
-    console.log("👤 STUDENT FOUND:", student); // 👈 هنا
+    console.log("👤 STUDENT FOUND:", student);
 
     if (!student) {
       return res.json({ success: false, message: "User not found" });
     }
 
-    if (!student.password) {
-      return res.json({ success: false, message: "Account not completed" });
-    }
-
     const isMatch = await bcrypt.compare(password, student.password);
 
-    console.log("🔑 PASSWORD MATCH:", isMatch); // 👈 زيد حتى هادي
+    console.log("🔑 PASSWORD MATCH:", isMatch);
+    console.log("🔓 PLAIN PASSWORD IN DB:", student.plainPassword);
 
     if (!isMatch) {
       return res.json({ success: false, message: "Wrong password" });
@@ -86,6 +82,6 @@ exports.login = async (req, res) => {
 
   } catch (error) {
     console.log("❌ LOGIN ERROR:", error);
-    res.status(500).json({ success: false });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
