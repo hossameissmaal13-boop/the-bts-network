@@ -235,18 +235,19 @@ exports.updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
     const { email, password } = req.body;
-
     const bcrypt = require("bcryptjs");
 
     let updateData = {};
 
-    if (email) updateData.email = email;
+    if (email) {
+      updateData.email = email.trim().replace(/\s+/g, "").toLowerCase();
+    }
 
     if (password) {
-  const hashed = await bcrypt.hash(password, 10);
-  updateData.password = hashed;
-  updateData.plainPassword = password; // 🔥 مهم
-}
+      const hashed = await bcrypt.hash(password, 10);
+      updateData.password = hashed;
+      updateData.plainPassword = password;
+    }
 
     const updated = await Student.findByIdAndUpdate(id, updateData, { new: true });
 
@@ -254,8 +255,8 @@ exports.updateStudent = async (req, res) => {
       success: true,
       student: updated
     });
-
   } catch (error) {
-    res.status(500).json({ success: false });
+    console.error("UPDATE ERROR:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };

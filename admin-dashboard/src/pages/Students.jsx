@@ -194,7 +194,11 @@ export default function Students() {
                           </div>
                         ) : (
                           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span>{showPasswordById[s._id] ? (s.plainPassword || "••••") : "••••"}</span>
+                            <span>
+             {showPasswordById[s._id]
+    ? (s.plainPassword ? s.plainPassword : "Code non disponible")
+    : "••••"}
+</span>
                             <button
                               onClick={() => togglePasswordVisibility(s._id)}
                               style={eyeBtnStyle}

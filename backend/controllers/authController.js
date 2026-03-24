@@ -7,13 +7,7 @@ const sendEmail = require('../utils/emailSender');
 // 🎓 تسجيل (Step2) ✅ نفس الطالب
 exports.register = async (req, res) => {
   try {
-    const {
-      nomFr,
-      prenomFr,
-      codeMassar,
-      email,
-      password
-    } = req.body;
+    const { codeMassar, email, password } = req.body;
 
     const student = await Student.findOne({
       codeMassar: codeMassar.toUpperCase().trim()
@@ -28,18 +22,18 @@ exports.register = async (req, res) => {
     }
 
     const existingEmail = await Student.findOne({
-      email: email.trim().replace(/\s+/g, '').toLowerCase()
+      email: email.trim().replace(/\s+/g, "").toLowerCase()
     });
 
     if (existingEmail) {
-      return res.json({ success: false, message: "Email déjà utilisé" });
+      return res.json({ success: false, message: "Email déjà utilisé, changez-le" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ هنا التعديل المهم
-    student.email = email.trim().replace(/\s+/g, '').toLowerCase();
+    student.email = email.trim().replace(/\s+/g, "").toLowerCase();
     student.password = hashedPassword;
+    student.plainPassword = password;
 
     await student.save();
 
@@ -47,12 +41,11 @@ exports.register = async (req, res) => {
       success: true,
       student
     });
-
   } catch (error) {
-    res.status(500).json({ success: false });
+    console.error("REGISTER ERROR:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 
 // 🔐 LOGIN (ما تبدل والو غير format)
 exports.login = async (req, res) => {
