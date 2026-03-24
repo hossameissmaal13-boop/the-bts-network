@@ -1,5 +1,4 @@
-const BASE_URL = "http://localhost:5000/api/students";
-
+const BASE_URL = "https://the-bts-network-production.up.railway.app/api/students";
 // =====================================
 // ✅ GET STUDENTS
 // =====================================

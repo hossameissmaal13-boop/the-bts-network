@@ -65,7 +65,7 @@ export default function RegisterStep2({ navigation, route }) {
     try {
       console.log("📤 Sending to backend:", payload);
 
-      const res = await fetch("http://192.168.1.3:5000/api/auth/register", {
+      const res = await fetch("https://the-bts-network-production.up.railway.app/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

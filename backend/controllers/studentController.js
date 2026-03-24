@@ -63,9 +63,8 @@ exports.addStudent = async (req, res) => {
   try {
     let { nom, prenom, codeMassar, filiere, anneeScolaire, dateNaissance } = req.body;
 
-    console.log("💡 Received student:", req.body);
+    console.log("📥 ADD STUDENT BODY:", req.body);
 
-    // ✅ تحقق
     if (!nom || !prenom || !codeMassar || !filiere || !anneeScolaire || !dateNaissance) {
       return res.status(400).json({
         success: false,
@@ -73,22 +72,22 @@ exports.addStudent = async (req, res) => {
       });
     }
 
-    // ✅ تنظيف
     nom = nom.trim();
     prenom = prenom.trim();
     codeMassar = codeMassar.trim().toUpperCase();
     filiere = filiere.trim().toUpperCase();
     anneeScolaire = anneeScolaire.trim();
+    dateNaissance = dateNaissance.trim();
 
-    // 🔍 تحقق واش موجود
     const existingStudent = await Student.findOne({ codeMassar });
 
     if (existingStudent) {
-      console.log("⚠️ Student already exists");
-      return res.json({ success: false, message: "Student already exists" });
+      return res.json({
+        success: false,
+        message: "Student already exists"
+      });
     }
 
-    // ✅ إنشاء
     const newStudent = new Student({
       nom,
       prenom,
@@ -100,7 +99,7 @@ exports.addStudent = async (req, res) => {
 
     await newStudent.save();
 
-    console.log("✅ Student saved:", newStudent);
+    console.log("✅ STUDENT SAVED:", newStudent);
 
     return res.json({
       success: true,
@@ -108,14 +107,13 @@ exports.addStudent = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("ADD STUDENT ERROR:", error);
+    console.error("❌ ADD STUDENT ERROR FULL:", error);
     return res.status(500).json({
       success: false,
-      message: "Server error"
+      message: error.message || "Server error"
     });
   }
 };
-
 
 // =====================================
 // ✅ GET ALL STUDENTS

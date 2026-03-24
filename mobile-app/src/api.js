@@ -1,6 +1,6 @@
-const BASE_URL = "http://192.168.1.3:5000/api";
+const BASE_URL = "https://the-bts-network-production.up.railway.app/api";
 
-// 🔵 VERIFY (Step1)
+// VERIFY
 export const verifyStudent = async (data) => {
   try {
     const res = await fetch(`${BASE_URL}/students/verify`, {
@@ -17,7 +17,7 @@ export const verifyStudent = async (data) => {
   }
 };
 
-// 🟢 REGISTER (Step2)
+// REGISTER
 export const registerStudent = async (data) => {
   try {
     const res = await fetch(`${BASE_URL}/auth/register`, {
@@ -34,7 +34,7 @@ export const registerStudent = async (data) => {
   }
 };
 
-// 🔐 LOGIN
+// LOGIN
 export const loginStudent = async (data) => {
   try {
     const res = await fetch(`${BASE_URL}/auth/login`, {
@@ -51,10 +51,10 @@ export const loginStudent = async (data) => {
   }
 };
 
-// 🔐 FORGOT PASSWORD
+// FORGOT PASSWORD
 export const forgotPassword = async (data) => {
   try {
-    const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
+    const res = await fetch(`${BASE_URL}/students/forgot-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

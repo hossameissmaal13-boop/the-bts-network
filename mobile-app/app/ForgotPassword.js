@@ -58,7 +58,7 @@ export default function ForgotPassword({ navigation }) {
         email
       };
 
-      const res = await fetch("http://192.168.1.3:5000/api/students/forgot-password", {
+      const res = await fetch("https://the-bts-network-production.up.railway.app/api/students/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
