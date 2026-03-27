@@ -1,12 +1,18 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middleware/authMiddleware');
-const { createLesson, getLessons } = require('../controllers/lessonController');
 
-// إضافة درس جديد (خاص بالأدمن)
-router.post('/', auth, createLesson);
+const {
+  addLesson,
+  getLessons,
+  getLessonsByFiliereAndAnnee,
+  updateLesson,
+  deleteLesson,
+} = require("../controllers/lessonController");
 
-// الحصول على الدروس حسب الشعبة والسنة
-router.get('/:branch/:year', auth, getLessons);
+router.post("/", addLesson);
+router.get("/", getLessons);
+router.get("/:filiere/:annee", getLessonsByFiliereAndAnnee);
+router.put("/:id", updateLesson);
+router.delete("/:id", deleteLesson);
 
 module.exports = router;

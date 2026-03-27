@@ -1,14 +1,29 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const lessonSchema = new mongoose.Schema({
-  branch: { type: String, enum: ['CG','CT','DAI','EII'], required: true },
-  year: { type: Number, enum: [1,2], required: true },
-  subject: { type: String, required: true },
-  chapter: { type: String, required: true },
-  content: { type: String }, // نص الدرس
-  exercises: [{ type: String }], // تمارين
-  exams: [{ type: String }], // امتحانات
-  createdAt: { type: Date, default: Date.now }
-});
+const lessonSchema = new mongoose.Schema(
+  {
+    filiere: {
+      type: String,
+      required: true,
+      enum: ["EII", "DAI", "TC", "CG"],
+      uppercase: true,
+      trim: true,
+    },
+    annee: {
+      type: String,
+      required: true,
+      enum: ["1", "2"],
+      trim: true,
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('Lesson', lessonSchema);
+lessonSchema.index({ filiere: 1, annee: 1, title: 1 }, { unique: true });
+
+module.exports = mongoose.model("Lesson", lessonSchema);
