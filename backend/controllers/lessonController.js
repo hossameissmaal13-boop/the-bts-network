@@ -1,4 +1,4 @@
-const Lesson = require("../models/Lesson");
+const Lesson = require("../models/lessonModel");
 
 // ✅ Ajouter une matière
 exports.addLesson = async (req, res) => {
