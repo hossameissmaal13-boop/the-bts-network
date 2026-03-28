@@ -8,6 +8,7 @@ import AjouterEtudiant from "./pages/AjouterEtudiant";
 import AjouterPost from "./pages/AjouterPost";
 import PosterMessage from "./pages/PosterMessage";
 import AjouterLessons from "./pages/AjouterLessons";
+import LessonContentsManager from "./pages/LessonContentsManager";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/ajouter-post" element={<AjouterPost />} />
         <Route path="/poster-message" element={<PosterMessage />} />
         <Route path="/ajouter-lessons" element={<AjouterLessons />} />
+        <Route path="/lesson-contents" element={<LessonContentsManager />} />
       </Routes>
     </Router>
   );

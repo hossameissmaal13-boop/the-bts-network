@@ -4,9 +4,7 @@ export const addLessonContent = async (data) => {
   try {
     const res = await fetch(BASE_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
     return await res.json();
@@ -28,9 +26,7 @@ export const updateLessonContent = async (id, data) => {
   try {
     const res = await fetch(`${BASE_URL}/${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
     return await res.json();

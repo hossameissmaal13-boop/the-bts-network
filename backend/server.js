@@ -6,6 +6,7 @@ require('dotenv').config();
 const studentRoutes = require('./routes/studentRoutes');
 const authRoutes = require('./routes/authRoutes');
 const lessonRoutes = require("./routes/lessonRoutes");
+const lessonContentRoutes = require("./routes/lessonContentRoutes");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.get("/", (req, res) => {
 app.use('/api/students', studentRoutes);
 app.use('/api/auth', authRoutes);
 app.use("/api/lessons", lessonRoutes);
+app.use("/api/lesson-contents", lessonContentRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))

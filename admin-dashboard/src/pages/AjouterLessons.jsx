@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import {
   getLessons,
@@ -8,13 +9,14 @@ import {
 } from "../services/apiLessons";
 
 export default function AjouterLessons() {
+  const navigate = useNavigate();
+
   const [lessons, setLessons] = useState([]);
   const [formData, setFormData] = useState({
     filiere: "EII",
     annee: "1",
     title: "",
   });
-
   const [editId, setEditId] = useState(null);
 
   const fetchLessons = async () => {
@@ -102,9 +104,7 @@ export default function AjouterLessons() {
 
     lessons.forEach((lesson) => {
       const key = `${lesson.filiere}_${lesson.annee}`;
-      if (groups[key]) {
-        groups[key].push(lesson);
-      }
+      if (groups[key]) groups[key].push(lesson);
     });
 
     return groups;
@@ -120,7 +120,11 @@ export default function AjouterLessons() {
         <div style={lessonListStyle}>
           {items.map((item) => (
             <div key={item._id} style={lessonRowStyle}>
-              <button style={lessonBtnStyle}>
+              <button
+                style={lessonBtnStyle}
+                onClick={() => navigate("/lesson-contents", { state: { lesson: item } })}
+                title="Gérer le contenu de cette matière"
+              >
                 {item.title}
               </button>
 
@@ -131,6 +135,7 @@ export default function AjouterLessons() {
                 >
                   Edit
                 </button>
+
                 <button
                   onClick={() => handleDelete(item._id)}
                   style={deleteBtnStyle}
@@ -146,13 +151,20 @@ export default function AjouterLessons() {
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "row-reverse", background: "#f8fafc", minHeight: "100vh" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row-reverse",
+        background: "#f8fafc",
+        minHeight: "100vh",
+      }}
+    >
       <Sidebar />
 
       <div style={{ flex: 1, padding: 30, marginRight: 240 }}>
         {/* HEADER */}
         <div style={headerStyle}>
-          <h2 style={{ margin: 0, color: "#0f172a" }}>📚 Ajouter Lessons</h2>
+          <h2 style={{ margin: 0, color: "#0f172a" }}>📚 Partager Cours</h2>
           <p style={{ marginTop: 8, color: "#64748b" }}>
             Ajoutez, modifiez et supprimez les matières par filière et année
           </p>
@@ -216,7 +228,7 @@ export default function AjouterLessons() {
           </div>
         </div>
 
-        {/* 8 TABLES */}
+        {/* TABLES */}
         <div style={tablesGridStyle}>
           {renderTable("EII - Première année", groupedLessons.EII_1)}
           {renderTable("EII - Deuxième année", groupedLessons.EII_2)}
@@ -340,7 +352,7 @@ const lessonBtnStyle = {
   borderRadius: 10,
   padding: "10px 14px",
   fontWeight: "600",
-  cursor: "default",
+  cursor: "pointer",
 };
 
 const editBtnStyle = {
