@@ -1,51 +1,55 @@
-const BASE_URL = "https://the-bts-network-production.up.railway.app/api/lesson-contents";
+const BASE_URL = "https://the-bts-network-production.up.railway.app/api";
 
-export const addLessonContent = async (data) => {
+// GET ALL
+export const getLessons = async () => {
   try {
-    const res = await fetch(BASE_URL, {
+    const res = await fetch(`${BASE_URL}/lessons`);
+    return await res.json();
+  } catch (err) {
+    return { success: false };
+  }
+};
+
+// ADD
+export const addLesson = async (data) => {
+  try {
+    const res = await fetch(`${BASE_URL}/lessons`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
     return await res.json();
-  } catch (error) {
-    return { success: false, message: error.message };
+  } catch (err) {
+    return { success: false };
   }
 };
 
-export const getLessonContentsByLesson = async (lessonId) => {
+// UPDATE
+export const updateLesson = async (id, data) => {
   try {
-    const res = await fetch(`${BASE_URL}/${lessonId}`);
-    return await res.json();
-  } catch (error) {
-    return { success: false, items: [], message: error.message };
-  }
-};
-
-export const updateLessonContent = async (id, data) => {
-  try {
-    const res = await fetch(`${BASE_URL}/${id}`, {
+    const res = await fetch(`${BASE_URL}/lessons/${id}`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
     return await res.json();
-  } catch (error) {
-    return { success: false, message: error.message };
+  } catch (err) {
+    return { success: false };
   }
 };
 
-export const deleteLessonContent = async (id) => {
+// DELETE
+export const deleteLesson = async (id) => {
   try {
-    const res = await fetch(`${BASE_URL}/${id}`, {
-      method: "DELETE"
+    const res = await fetch(`${BASE_URL}/lessons/${id}`, {
+      method: "DELETE",
     });
     return await res.json();
-  } catch (error) {
-    return { success: false, message: error.message };
+  } catch (err) {
+    return { success: false };
   }
 };

@@ -24,7 +24,7 @@ export default function App() {
         <Route path="/ajouter-post" element={<AjouterPost />} />
         <Route path="/poster-message" element={<PosterMessage />} />
         <Route path="/ajouter-lessons" element={<AjouterLessons />} />
-        <Route path="/lesson-contents" element={<LessonsContentsManager />} />
+        <Route path="/lesson-contents" element={<LessonContentsManager />} />
       </Routes>
     </Router>
   );
