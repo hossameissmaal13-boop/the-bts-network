@@ -122,7 +122,7 @@ export default function RegisterStep1({ navigation }) {
             onBlur={() => setFocusField(null)}  
           >  
             <Picker.Item label={t.btsLibre} value="Libre" />  
-            <Picker.Item label={t.btsConnected} value="BTS Connecter" />  
+            <Picker.Item label={t.btsConnected} value="Connecter" />  
           </Picker>  
         </View>  
 

@@ -37,48 +37,52 @@ export default function Login({ navigation }) {
   };
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert(t.error, t.fillAllFields || "Fill all fields");
+  if (!email || !password) {
+    Alert.alert("Error", "Fill all fields");
+    return;
+  }
+
+  const emailCleaned = cleanEmail(email);
+
+  try {
+    const res = await fetch(`${BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: emailCleaned,
+        password: password
+      })
+    });
+
+    const text = await res.text();
+    console.log("📥 LOGIN STATUS:", res.status);
+    console.log("📥 LOGIN RAW RESPONSE:", text);
+
+    if (!text) {
+      Alert.alert("Error", "Empty server response");
       return;
     }
 
-    const emailCleaned = cleanEmail(email);
-
+    let data;
     try {
-      const res = await fetch(`${BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: emailCleaned,
-          password: password
-        })
-      });
-
-      const text = await res.text();
-      console.log("📥 LOGIN RAW RESPONSE:", text);
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        Alert.alert(t.error, "Server returned invalid data");
-        return;
-      }
-
-      if (data.success) {
-        navigation.replace("Welcome", { student: data.student });
-      } else {
-        Alert.alert(t.error, data.message || "Email or password invalid");
-      }
-
-    } catch (error) {
-      console.log("❌ LOGIN ERROR:", error);
-      Alert.alert(t.error, t.serverProblem || "Server error");
+      data = JSON.parse(text);
+    } catch (e) {
+      Alert.alert("Error", text.slice(0, 120));
+      return;
     }
-  };
 
+    if (data.success) {
+      navigation.replace("Welcome", { student: data.student });
+    } else {
+      Alert.alert("Error", data.message || "Email or password invalid");
+    }
+  } catch (error) {
+    console.log("❌ LOGIN ERROR:", error);
+    Alert.alert("Error", "Network or server error");
+  }
+};
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}

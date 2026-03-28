@@ -5,9 +5,9 @@ import Students from "./pages/Students";
 import Lessons from "./pages/Lessons";
 import Post from "./pages/Post";
 import AjouterEtudiant from "./pages/AjouterEtudiant";
-import AjouterLessons from "./pages/AjouterLessons";
 import AjouterPost from "./pages/AjouterPost";
 import PosterMessage from "./pages/PosterMessage";
+import AjouterLessons from "./pages/AjouterLessons";
 
 export default function App() {
   return (
@@ -20,9 +20,9 @@ export default function App() {
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/post" element={<Post />} />
         <Route path="/ajouter-etudiant" element={<AjouterEtudiant />} />
-        <Route path="/ajouter-lessons" element={<AjouterLessons />} />
         <Route path="/ajouter-post" element={<AjouterPost />} />
         <Route path="/poster-message" element={<PosterMessage />} />
+        <Route path="/ajouter-lessons" element={<AjouterLessons />} />
       </Routes>
     </Router>
   );

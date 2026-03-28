@@ -1,37 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { getToken } from '../src/utils/tokenManager';
-import { BASE_URL } from '../src/api';
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function Posts() {
-  const [posts, setPosts] = useState([]);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const token = await getToken();
-      const res = await fetch(`${BASE_URL}/posts`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      setPosts(data || []);
-    };
-    fetchPosts();
-  }, []);
+export default function Settings({ navigation, route }) {
+  const student = route?.params?.student || {};
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Posts</Text>
-      <FlatList
-        data={posts}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => <Text style={styles.item}>{item.content}</Text>}
-      />
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={24} color="#2563eb" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.text}>Student: {student?.prenom || ""} {student?.nom || ""}</Text>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container:{ flex:1, padding:20 },
-  title:{ fontSize:24, marginBottom:20, textAlign:'center' },
-  item:{ padding:10, borderBottomWidth:1, borderColor:'#ccc' }
+  safeArea: { flex: 1, backgroundColor: "#f6faff" },
+  container: { padding: 20 },
+  backBtn: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
+  backText: { color: "#2563eb", marginLeft: 6, fontWeight: "bold" },
+  title: { fontSize: 26, fontWeight: "bold", color: "#0f172a", marginBottom: 12 },
+  text: { fontSize: 15, color: "#64748b", marginBottom: 10 }
 });

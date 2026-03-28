@@ -44,58 +44,73 @@ export default function RegisterStep2({ navigation, route }) {
   };
 
   const handleSubmit = async () => {
-    if (!formData.email || !formData.code || !formData.confirmCode) {
-      Alert.alert(t.error, t.fillAllFields || "Fill all fields");
-      return;
-    }
+  if (!formData.email || !formData.code || !formData.confirmCode) {
+    Alert.alert(t.error, t.fillAllFields || "Fill all fields");
+    return;
+  }
 
-    if (formData.code !== formData.confirmCode) {
-      Alert.alert(t.error, t.codesDoNotMatch || "Codes do not match");
-      return;
-    }
+  if (formData.code !== formData.confirmCode) {
+    Alert.alert(t.error, t.codesDoNotMatch || "Codes do not match");
+    return;
+  }
 
-    const payload = {
+  let payload = {
+    email: formData.email.trim().replace(/\s+/g, "").toLowerCase(),
+    password: formData.code,
+    typeBTS
+  };
+
+  if (typeBTS === "Libre") {
+    payload = {
+      ...payload,
       nomFr: step1Data.nomFr,
       prenomFr: step1Data.prenomFr,
-      codeMassar: step1Data.codeMassar,
-      email: formData.email.trim().replace(/\s+/g, "").toLowerCase(),
-      password: formData.code
+      filiere: step1Data.filiere,
+      anneeScolaire: step1Data.anneeScolaire
     };
+  } else {
+    payload = {
+      ...payload,
+      nomFr: step1Data.nomFr,
+      prenomFr: step1Data.prenomFr,
+      codeMassar: step1Data.codeMassar
+    };
+  }
 
+  try {
+    console.log("📤 Sending to backend:", payload);
+
+    const res = await fetch("https://the-bts-network-production.up.railway.app/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    console.log("📥 REGISTER RAW RESPONSE:", text);
+
+    let data;
     try {
-      console.log("📤 Sending to backend:", payload);
-
-      const res = await fetch("https://the-bts-network-production.up.railway.app/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const text = await res.text();
-      console.log("📥 REGISTER RAW RESPONSE:", text);
-
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        Alert.alert(t.error, t.serverProblem);
-        return;
-      }
-
-      if (data.success) {
-        Alert.alert(t.success, t.registrationComplete || "Registration complete!");
-        navigation.replace("Welcome");
-      } else {
-        Alert.alert(t.error, data.message || "Registration failed");
-      }
-
-    } catch (error) {
-      console.log("❌ REGISTER ERROR:", error);
+      data = JSON.parse(text);
+    } catch (e) {
       Alert.alert(t.error, t.serverProblem);
+      return;
     }
-  };
+
+    if (data.success) {
+      Alert.alert(t.success, t.registrationComplete || "Registration complete!");
+      navigation.replace("Welcome", { student: data.student });
+    } else {
+      Alert.alert(t.error, data.message || "Registration failed");
+    }
+
+  } catch (error) {
+    console.log("❌ REGISTER ERROR:", error);
+    Alert.alert(t.error, t.serverProblem);
+  }
+};
 
   return (
     <KeyboardAvoidingView

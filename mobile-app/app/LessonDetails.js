@@ -20,6 +20,11 @@ export default function Welcome({ navigation, route }) {
       <Text style={styles.text}>
         مرحبا {student?.prenom || ""}
       </Text>
+      <ServicesRow
+     navigation={navigation}
+     currentScreen="LessonDetails"
+     student={student}
+/>
 
       <ActivityIndicator size="large" color="#2563eb" style={{ marginTop: 20 }} />
     </View>
