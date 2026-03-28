@@ -16,10 +16,11 @@ const studentSchema = new mongoose.Schema(
 
     codeMassar: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true, // ✅ مهم بزاف
       uppercase: true,
-      trim: true
+      trim: true,
+      default: null
     },
 
     filiere: {
@@ -43,13 +44,14 @@ const studentSchema = new mongoose.Schema(
 
     dateNaissance: {
       type: String,
-      required: true,
-      trim: true
+      trim: true,
+      default: null
     },
 
-    // ✅ الجديد فقط
     email: {
       type: String,
+      unique: true,
+      sparse: true, // ✅ مهم باش Libre يخدم
       default: null
     },
 
@@ -57,11 +59,11 @@ const studentSchema = new mongoose.Schema(
       type: String,
       default: null
     },
-    plainPassword: {
-     type: String,
-     default: null
-    }
 
+    plainPassword: {
+      type: String,
+      default: null
+    }
   },
   {
     timestamps: true
