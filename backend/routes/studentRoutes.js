@@ -3,6 +3,13 @@ const router = express.Router();
 const studentController = require("../controllers/studentController");
 const auth = require("../middleware/authMiddleware");
 
+router.get("/ping-forgot", (req, res) => {
+  return res.json({
+    success: true,
+    message: "PING FORGOT OK"
+  });
+});
+
 router.post("/verify", studentController.verifyStudent);
 router.post("/forgot-password", studentController.forgotPassword);
 router.get("/me", auth, studentController.getMe);
