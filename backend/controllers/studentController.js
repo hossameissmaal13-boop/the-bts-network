@@ -138,8 +138,7 @@ exports.getMe = async (req, res) => {
 // FORGOT PASSWORD
 // ===============================
 exports.forgotPassword = async (req, res) => {
-  console.log("🚀 forgotPassword route hit");
-
+  console.log("🚀 forgotPassword POST hit");
   return res.status(200).json({
     success: true,
     message: "FORGOT PASSWORD ROUTE OK"
