@@ -138,72 +138,12 @@ exports.getMe = async (req, res) => {
 // FORGOT PASSWORD
 // ===============================
 exports.forgotPassword = async (req, res) => {
-  try {
-    console.log("📥 FORGOT PASSWORD BODY:", req.body);
+  console.log("🚀 forgotPassword route hit");
 
-    const { nom, prenom, codeMassar, email } = req.body;
-
-    if (!nom || !prenom || !codeMassar || !email) {
-      return res.status(400).json({
-        success: false,
-        message: "Tous les champs sont obligatoires"
-      });
-    }
-
-    const cleanedNom = nom.trim();
-    const cleanedPrenom = prenom.trim();
-    const cleanedCodeMassar = codeMassar.trim().toUpperCase();
-    const cleanedEmail = email.trim().toLowerCase();
-
-    const student = await Student.findOne({
-      nom: new RegExp(`^${cleanedNom}$`, "i"),
-      prenom: new RegExp(`^${cleanedPrenom}$`, "i"),
-      codeMassar: cleanedCodeMassar,
-      email: cleanedEmail
-    });
-
-    console.log("🎓 FOUND STUDENT:", student ? student._id : "NOT FOUND");
-
-    if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: "Informations incorrectes"
-      });
-    }
-
-    const message = `
-Bonjour ${student.prenom} ${student.nom},
-
-Voici les informations de votre compte BTS Network :
-
-Nom : ${student.nom}
-Prénom : ${student.prenom}
-Filière : ${student.filiere}
-Année scolaire : ${student.anneeScolaire}
-Email : ${student.email || "-"}
-
-Mot de passe : ${student.plainPassword || "Non disponible"}
-
-BTS Network
-    `;
-
-    await sendEmail(
-      cleanedEmail,
-      "Récupération de votre compte BTS Network",
-      message
-    );
-
-    return res.json({
-      success: true,
-      message: "Les informations de votre compte ont été envoyées par email"
-    });
-  } catch (error) {
-    console.error("❌ FORGOT PASSWORD ERROR:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Erreur serveur"
-    });
-  }
+  return res.status(200).json({
+    success: true,
+    message: "FORGOT PASSWORD ROUTE OK"
+  });
 };
 
 // ===============================
