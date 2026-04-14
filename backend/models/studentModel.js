@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
 
+const generateStudentId = () => {
+  const random = Math.floor(10000000 + Math.random() * 90000000);
+  return `STD${random}`;
+};
+
 const studentSchema = new mongoose.Schema(
   {
     nom: {
@@ -17,7 +22,7 @@ const studentSchema = new mongoose.Schema(
     codeMassar: {
       type: String,
       unique: true,
-      sparse: true, // ✅ مهم بزاف
+      sparse: true,
       uppercase: true,
       trim: true,
       default: null
@@ -51,7 +56,9 @@ const studentSchema = new mongoose.Schema(
     email: {
       type: String,
       unique: true,
-      sparse: true, // ✅ مهم باش Libre يخدم
+      sparse: true,
+      trim: true,
+      lowercase: true,
       default: null
     },
 
@@ -60,10 +67,19 @@ const studentSchema = new mongoose.Schema(
       default: null
     },
 
-    plainPassword: {
+    photo: {
       type: String,
-      default: null
-    }
+      default: ""
+    },
+
+    studentId: {
+      type: String,
+      unique: true,
+      default: generateStudentId
+    },
+    plainPassword: {
+  type: String
+}
   },
   {
     timestamps: true

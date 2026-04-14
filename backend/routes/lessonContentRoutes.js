@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../middleware/uploadMiddleware");
 
 const {
   addLessonContent,
@@ -8,9 +9,9 @@ const {
   deleteLessonContent
 } = require("../controllers/lessonContentController");
 
-router.post("/", addLessonContent);
+router.post("/", upload.single("file"), addLessonContent);
 router.get("/:lessonId", getLessonContentsByLesson);
-router.put("/:id", updateLessonContent);
+router.put("/:id", upload.single("file"), updateLessonContent);
 router.delete("/:id", deleteLessonContent);
 
 module.exports = router;

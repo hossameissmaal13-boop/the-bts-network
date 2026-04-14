@@ -44,6 +44,21 @@ const lessonContentSchema = new mongoose.Schema(
     content: {
       type: String,
       default: ""
+    },
+
+    fileUrl: {
+      type: String,
+      default: ""
+    },
+
+    fileName: {
+      type: String,
+      default: ""
+    },
+
+    fileType: {
+      type: String,
+      default: ""
     }
   },
   { timestamps: true }

@@ -159,7 +159,7 @@ export default function Report({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { padding: 20, paddingBottom: 60 },
-  backBtn: { marginBottom: 20 },
+  backBtn: { marginTop: 25, marginBottom: 20 },
   backText: { color: '#2e86de', fontWeight: 'bold' },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
   label: { marginBottom: 5, fontWeight: 'bold' },

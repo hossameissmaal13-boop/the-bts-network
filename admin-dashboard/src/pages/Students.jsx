@@ -12,6 +12,8 @@ export default function Students() {
 
   const fetchData = async () => {
     const res = await getStudents();
+    console.log("STUDENTS RESPONSE =", res);
+
     if (res.success) {
       setStudents(res.students || []);
     }
@@ -49,6 +51,10 @@ export default function Students() {
     setEditId(student._id);
     setEmail(student.email || "");
     setPassword("");
+    setShowPasswordById((prev) => ({
+      ...prev,
+      [student._id]: false
+    }));
   };
 
   const handleCancel = () => {
@@ -59,9 +65,12 @@ export default function Students() {
 
   const handleUpdate = async (id) => {
     const payload = {
-      email: email.trim(),
-      password: password
+      email: email.trim()
     };
+
+    if (password.trim()) {
+      payload.password = password.trim();
+    }
 
     const res = await updateStudent(id, payload);
 
@@ -71,7 +80,7 @@ export default function Students() {
       setPassword("");
       fetchData();
     } else {
-      alert("Erreur lors de la mise à jour");
+      alert(res.message || "Erreur lors de la mise à jour");
     }
   };
 
@@ -80,6 +89,12 @@ export default function Students() {
       ...prev,
       [id]: !prev[id]
     }));
+  };
+
+  const getDisplayedStudentId = (student) => {
+    if (student.studentId) return student.studentId;
+    if (student._id) return `STD-${student._id.slice(-6).toUpperCase()}`;
+    return "-";
   };
 
   const renderTable = (title, subtitle, data) => (
@@ -114,6 +129,7 @@ export default function Students() {
         >
           <thead>
             <tr style={{ background: "#2e86de", color: "#fff" }}>
+              <th style={thStyle}>ID</th>
               <th style={thStyle}>Nom</th>
               <th style={thStyle}>Prénom</th>
               <th style={thStyle}>Filière</th>
@@ -127,7 +143,7 @@ export default function Students() {
           <tbody>
             {data.length === 0 ? (
               <tr>
-                <td colSpan="7" style={{ padding: 20, textAlign: "center", color: "#64748b" }}>
+                <td colSpan="8" style={{ padding: 20, textAlign: "center", color: "#64748b" }}>
                   Aucun étudiant trouvé
                 </td>
               </tr>
@@ -139,6 +155,7 @@ export default function Students() {
                     background: index % 2 === 0 ? "#ffffff" : "#f8fafc"
                   }}
                 >
+                  <td style={tdStyle}>{getDisplayedStudentId(s)}</td>
                   <td style={tdStyle}>{s.nom}</td>
                   <td style={tdStyle}>{s.prenom}</td>
                   <td style={tdStyle}>{s.filiere}</td>
@@ -158,40 +175,39 @@ export default function Students() {
                   </td>
 
                   <td style={tdStyle}>
-                    {editId === s._id ? (
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <input
-                          type={showPasswordById[s._id] ? "text" : "password"}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Nouveau code"
-                          style={{ ...inputStyle, marginBottom: 0 }}
-                        />
-                        <button
-                          onClick={() => togglePasswordVisibility(s._id)}
-                          style={eyeBtnStyle}
-                          title="Afficher / masquer"
-                        >
-                          {showPasswordById[s._id] ? "🙈" : "👁️"}
-                        </button>
-                      </div>
-                    ) : (
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span>
-                          {showPasswordById[s._id]
-                            ? (s.plainPassword ? s.plainPassword : "Code non disponible")
-                            : "••••"}
-                        </span>
-                        <button
-                          onClick={() => togglePasswordVisibility(s._id)}
-                          style={eyeBtnStyle}
-                          title="Afficher / masquer"
-                        >
-                          {showPasswordById[s._id] ? "🙈" : "👁️"}
-                        </button>
-                      </div>
-                    )}
-                  </td>
+  {editId === s._id ? (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <input
+        type={showPasswordById[s._id] ? "text" : "password"}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Nouveau code"
+        style={{ ...inputStyle, marginBottom: 0 }}
+      />
+      <button
+        onClick={() => togglePasswordVisibility(s._id)}
+        style={eyeBtnStyle}
+      >
+        {showPasswordById[s._id] ? "🙈" : "👁️"}
+      </button>
+    </div>
+  ) : (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <span>
+        {showPasswordById[s._id]
+          ? (s.plainPassword || "----")
+          : "••••"}
+      </span>
+
+      <button
+        onClick={() => togglePasswordVisibility(s._id)}
+        style={eyeBtnStyle}
+      >
+        {showPasswordById[s._id] ? "🙈" : "👁️"}
+      </button>
+    </div>
+  )}
+</td>
 
                   <td style={tdStyle}>
                     {editId === s._id ? (
@@ -241,7 +257,7 @@ export default function Students() {
           <div style={{ marginBottom: 20 }}>
             <h2 style={{ margin: 0, color: "#0f172a" }}>👨‍🎓 Students</h2>
             <p style={{ marginTop: 8, color: "#64748b" }}>
-              Gérez les emails et les codes des étudiants inscrits
+              Gérez les emails, les codes et les IDs des étudiants inscrits
             </p>
           </div>
 

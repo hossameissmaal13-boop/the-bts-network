@@ -2,6 +2,10 @@ const bcrypt = require("bcryptjs");
 const Student = require("../models/studentModel");
 const generateToken = require("../utils/tokenGenerator");
 
+const normalize = (value) => (value || "").toString().trim();
+const normalizeUpper = (value) => normalize(value).replace(/\s+/g, "").toUpperCase();
+const normalizeEmail = (value) => normalize(value).replace(/\s+/g, "").toLowerCase();
+
 // ===============================
 // REGISTER
 // ===============================
@@ -13,10 +17,15 @@ exports.register = async (req, res) => {
       codeMassar,
       filiere,
       anneeScolaire,
+      dateNaissance,
       email,
       password,
       typeBTS
     } = req.body;
+
+    email = normalizeEmail(email);
+    password = normalize(password);
+    typeBTS = normalize(typeBTS);
 
     if (!email || !password) {
       return res.status(400).json({
@@ -24,10 +33,6 @@ exports.register = async (req, res) => {
         message: "Email et mot de passe obligatoires"
       });
     }
-
-    email = email.trim().replace(/\s+/g, "").toLowerCase();
-    password = password;
-    typeBTS = (typeBTS || "").trim();
 
     const existingEmail = await Student.findOne({ email });
     if (existingEmail) {
@@ -39,10 +44,13 @@ exports.register = async (req, res) => {
 
     let student = null;
 
-    // ===============================
-    // BTS LIBRE
-    // ===============================
     if (typeBTS === "Libre") {
+      nomFr = normalize(nomFr);
+      prenomFr = normalize(prenomFr);
+      filiere = normalizeUpper(filiere);
+      anneeScolaire = normalize(anneeScolaire);
+      dateNaissance = normalize(dateNaissance) || "2000-01-01";
+
       if (!nomFr || !prenomFr || !filiere || !anneeScolaire) {
         return res.status(400).json({
           success: false,
@@ -50,12 +58,6 @@ exports.register = async (req, res) => {
         });
       }
 
-      nomFr = nomFr.trim();
-      prenomFr = prenomFr.trim();
-      filiere = filiere.trim().toUpperCase();
-      anneeScolaire = anneeScolaire.trim();
-
-      // كنقلبو واش الطالب libre كاين من قبل
       student = await Student.findOne({
         nom: new RegExp(`^${nomFr}$`, "i"),
         prenom: new RegExp(`^${prenomFr}$`, "i"),
@@ -64,17 +66,17 @@ exports.register = async (req, res) => {
         typeBTS: "Libre"
       });
 
-      // إلا ما كانش، كنصاوبو record جديد
       if (!student) {
         student = new Student({
           nom: nomFr,
           prenom: prenomFr,
+          codeMassar: `LIBRE_${Date.now()}`,
           filiere,
           anneeScolaire,
-          typeBTS: "Libre"
+          typeBTS: "Libre",
+          dateNaissance
         });
       } else {
-        // إلا كان record libre موجود وديجا مسجل
         if (student.email) {
           return res.status(400).json({
             success: false,
@@ -82,12 +84,11 @@ exports.register = async (req, res) => {
           });
         }
       }
-    }
+    } else {
+      nomFr = normalize(nomFr);
+      prenomFr = normalize(prenomFr);
+      codeMassar = normalizeUpper(codeMassar);
 
-    // ===============================
-    // BTS CONNECTER
-    // ===============================
-    else {
       if (!nomFr || !prenomFr || !codeMassar) {
         return res.status(400).json({
           success: false,
@@ -95,9 +96,11 @@ exports.register = async (req, res) => {
         });
       }
 
-      codeMassar = codeMassar.trim().toUpperCase();
-
-      student = await Student.findOne({ codeMassar });
+      student = await Student.findOne({
+        codeMassar,
+        nom: new RegExp(`^${nomFr}$`, "i"),
+        prenom: new RegExp(`^${prenomFr}$`, "i")
+      });
 
       if (!student) {
         return res.status(404).json({
@@ -112,11 +115,12 @@ exports.register = async (req, res) => {
           message: "Ce compte est déjà inscrit"
         });
       }
+
+      student.typeBTS = "Connecter";
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    student.email = email;
     student.password = hashedPassword;
     student.plainPassword = password;
 
@@ -143,16 +147,15 @@ exports.login = async (req, res) => {
   try {
     let { email, password } = req.body;
 
+    email = normalizeEmail(email);
+    password = normalize(password);
+
     if (!email || !password) {
       return res.status(400).json({
         success: false,
         message: "Email et mot de passe obligatoires"
       });
     }
-
-    email = email.trim().replace(/\s+/g, "").toLowerCase();
-
-    console.log("📥 LOGIN DATA:", { email, password });
 
     const student = await Student.findOne({ email });
 
@@ -163,10 +166,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(password, student.password);
-
-    console.log("🔑 PASSWORD MATCH:", isMatch);
-    console.log("🔓 PLAIN PASSWORD IN DB:", student.plainPassword);
+    const isMatch = await bcrypt.compare(password, student.password || "");
 
     if (!isMatch) {
       return res.status(400).json({
@@ -182,6 +182,54 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error("LOGIN ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
+  }
+};
+
+// ===============================
+// CHANGE PASSWORD
+// ===============================
+exports.changePassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Ancien et nouveau mot de passe obligatoires"
+      });
+    }
+
+    const student = await Student.findById(id);
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Étudiant introuvable"
+      });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, student.password || "");
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Ancien mot de passe incorrect"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    student.password = hashedPassword;
+    await student.save();
+
+    return res.json({
+      success: true,
+      message: "Mot de passe modifié avec succès"
+    });
+  } catch (error) {
+    console.error("CHANGE PASSWORD ERROR:", error);
     return res.status(500).json({
       success: false,
       message: "Erreur serveur"

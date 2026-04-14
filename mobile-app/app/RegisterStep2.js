@@ -12,6 +12,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LanguageContext } from "../src/utils/LanguageContext";
+import { saveToken } from "../src/utils/tokenManager";
+
+const BASE_URL = "https://the-bts-network-production-e3f6.up.railway.app/api";
 
 export default function RegisterStep2({ navigation, route }) {
   const { language, translations } = useContext(LanguageContext);
@@ -34,7 +37,10 @@ export default function RegisterStep2({ navigation, route }) {
   const confirmRef = useRef(null);
 
   const handleChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const focusBack = (ref) => {
@@ -44,73 +50,84 @@ export default function RegisterStep2({ navigation, route }) {
   };
 
   const handleSubmit = async () => {
-  if (!formData.email || !formData.code || !formData.confirmCode) {
-    Alert.alert(t.error, t.fillAllFields || "Fill all fields");
-    return;
-  }
-
-  if (formData.code !== formData.confirmCode) {
-    Alert.alert(t.error, t.codesDoNotMatch || "Codes do not match");
-    return;
-  }
-
-  let payload = {
-    email: formData.email.trim().replace(/\s+/g, "").toLowerCase(),
-    password: formData.code,
-    typeBTS
-  };
-
-  if (typeBTS === "Libre") {
-    payload = {
-      ...payload,
-      nomFr: step1Data.nomFr,
-      prenomFr: step1Data.prenomFr,
-      filiere: step1Data.filiere,
-      anneeScolaire: step1Data.anneeScolaire
-    };
-  } else {
-    payload = {
-      ...payload,
-      nomFr: step1Data.nomFr,
-      prenomFr: step1Data.prenomFr,
-      codeMassar: step1Data.codeMassar
-    };
-  }
-
-  try {
-    console.log("📤 Sending to backend:", payload);
-
-    const res = await fetch("https://the-bts-network-production.up.railway.app/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const text = await res.text();
-    console.log("📥 REGISTER RAW RESPONSE:", text);
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      Alert.alert(t.error, t.serverProblem);
+    if (!formData.email || !formData.code || !formData.confirmCode) {
+      Alert.alert(t.error || "Error", t.fillAllFields || "Fill all fields");
       return;
     }
 
-    if (data.success) {
-      Alert.alert(t.success, t.registrationComplete || "Registration complete!");
-      navigation.replace("Welcome", { student: data.student });
-    } else {
-      Alert.alert(t.error, data.message || "Registration failed");
+    if (formData.code !== formData.confirmCode) {
+      Alert.alert(t.error || "Error", t.codesDoNotMatch || "Codes do not match");
+      return;
     }
 
-  } catch (error) {
-    console.log("❌ REGISTER ERROR:", error);
-    Alert.alert(t.error, t.serverProblem);
-  }
-};
+    let payload = {
+      email: formData.email.trim().replace(/\s+/g, "").toLowerCase(),
+      password: formData.code,
+      typeBTS
+    };
+
+    if (typeBTS === "Libre") {
+      payload = {
+        ...payload,
+        nomFr: step1Data.nomFr,
+        prenomFr: step1Data.prenomFr,
+        filiere: step1Data.filiere,
+        anneeScolaire: step1Data.anneeScolaire,
+        dateNaissance: step1Data.dateNaissance
+      };
+    } else {
+      payload = {
+        ...payload,
+        nomFr: step1Data.nomFr,
+        prenomFr: step1Data.prenomFr,
+        codeMassar: step1Data.codeMassar
+      };
+    }
+
+    try {
+      const res = await fetch(`${BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const text = await res.text();
+      console.log("📥 REGISTER STATUS:", res.status);
+      console.log("📥 REGISTER RAW RESPONSE:", text);
+
+      if (!text) {
+        Alert.alert(t.error || "Error", "Empty server response");
+        return;
+      }
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        Alert.alert(t.error || "Error", text.slice(0, 120));
+        return;
+      }
+
+      if (data.success) {
+        if (data.token) {
+          await saveToken(data.token);
+        }
+
+        Alert.alert(
+          t.success || "Success",
+          t.registrationComplete || "Registration complete!",
+          [{ text: "OK", onPress: () => navigation.replace("Welcome", { student: data.student }) }]
+        );
+      } else {
+        Alert.alert(t.error || "Error", data.message || "Registration failed");
+      }
+    } catch (error) {
+      console.log("❌ REGISTER ERROR:", error);
+      Alert.alert(t.error || "Error", t.serverProblem || "Server problem");
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -118,13 +135,11 @@ export default function RegisterStep2({ navigation, route }) {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        {/* BACK */}
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color="#2e86de" />
           <Text style={styles.backText}>{t.back}</Text>
         </TouchableOpacity>
 
-        {/* PROGRESS */}
         <View style={styles.progressBar}>
           <View style={[styles.progressStep, styles.activeStep]} />
           <View style={[styles.progressStep, styles.activeStep]} />
@@ -132,7 +147,6 @@ export default function RegisterStep2({ navigation, route }) {
 
         <Text style={styles.title}>{t.registerTitle}</Text>
 
-        {/* EMAIL */}
         <Text style={styles.label}>{t.email}</Text>
         <TextInput
           value={formData.email}
@@ -145,7 +159,6 @@ export default function RegisterStep2({ navigation, route }) {
           onBlur={() => setFocusField(null)}
         />
 
-        {/* CODE */}
         <Text style={styles.label}>{t.code}</Text>
         <View style={[styles.inputWrapper, focusField === "code" && styles.focused]}>
           <TextInput
@@ -169,7 +182,6 @@ export default function RegisterStep2({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        {/* CONFIRM CODE */}
         <Text style={styles.label}>{t.confirmCode}</Text>
         <View style={[styles.inputWrapper, focusField === "confirmCode" && styles.focused]}>
           <TextInput
@@ -193,7 +205,6 @@ export default function RegisterStep2({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        {/* BUTTON */}
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>{t.validate}</Text>
         </TouchableOpacity>
@@ -207,25 +218,21 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 60
   },
-
   backBtn: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 15,
     marginTop: 20
   },
-
   backText: {
     color: "#2e86de",
     marginLeft: 5,
     fontWeight: "bold"
   },
-
   progressBar: {
     flexDirection: "row",
     marginBottom: 20
   },
-
   progressStep: {
     flex: 1,
     height: 6,
@@ -233,22 +240,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
     borderRadius: 3
   },
-
   activeStep: {
     backgroundColor: "#2e86de"
   },
-
   title: {
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20
   },
-
   label: {
     marginBottom: 5,
     fontWeight: "bold"
   },
-
   input: {
     borderWidth: 2,
     borderColor: "#ddd",
@@ -256,7 +259,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 15
   },
-
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
@@ -266,16 +268,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 15
   },
-
   codeInput: {
     flex: 1,
     paddingVertical: 12
   },
-
   focused: {
     borderColor: "#2e86de"
   },
-
   button: {
     backgroundColor: "#2e86de",
     padding: 14,
@@ -283,7 +282,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10
   },
-
   buttonText: {
     color: "#fff",
     fontWeight: "bold"

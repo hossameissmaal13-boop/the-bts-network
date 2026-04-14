@@ -1,10 +1,10 @@
 const LessonContent = require("../models/lessonContentModel");
 const Lesson = require("../models/lessonModel");
 
-// Ajouter contenu
+// Ajouter contenu avec fichier
 exports.addLessonContent = async (req, res) => {
   try {
-    let { lessonId, title, type, content } = req.body;
+    let { lessonId, title, type } = req.body;
 
     if (!lessonId || !title || !type) {
       return res.status(400).json({
@@ -22,6 +22,16 @@ exports.addLessonContent = async (req, res) => {
       });
     }
 
+    let fileUrl = "";
+    let fileName = "";
+    let fileType = "";
+
+    if (req.file) {
+      fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      fileName = req.file.originalname;
+      fileType = req.file.mimetype;
+    }
+
     const newContent = await LessonContent.create({
       lessonId,
       filiere: lesson.filiere,
@@ -29,7 +39,9 @@ exports.addLessonContent = async (req, res) => {
       subjectTitle: lesson.title,
       title: title.trim(),
       type: type.trim(),
-      content: content || ""
+      fileUrl,
+      fileName,
+      fileType
     });
 
     return res.status(201).json({
@@ -46,7 +58,7 @@ exports.addLessonContent = async (req, res) => {
   }
 };
 
-// Get by subject
+// Get by lesson
 exports.getLessonContentsByLesson = async (req, res) => {
   try {
     const { lessonId } = req.params;
@@ -73,29 +85,32 @@ exports.getLessonContentsByLesson = async (req, res) => {
 exports.updateLessonContent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, type, content } = req.body;
+    const { title, type } = req.body;
 
-    const updated = await LessonContent.findByIdAndUpdate(
-      id,
-      {
-        title,
-        type,
-        content
-      },
-      { new: true }
-    );
+    const item = await LessonContent.findById(id);
 
-    if (!updated) {
+    if (!item) {
       return res.status(404).json({
         success: false,
         message: "Contenu introuvable"
       });
     }
 
+    item.title = title || item.title;
+    item.type = type || item.type;
+
+    if (req.file) {
+      item.fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      item.fileName = req.file.originalname;
+      item.fileType = req.file.mimetype;
+    }
+
+    await item.save();
+
     return res.json({
       success: true,
       message: "Contenu modifié",
-      item: updated
+      item
     });
   } catch (error) {
     console.error("UPDATE LESSON CONTENT ERROR:", error);

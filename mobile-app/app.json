@@ -1,6 +1,17 @@
 {
-  "plugins": [
-    "@react-native-community/datetimepicker",
-    "expo-mail-composer"
-  ]
+  "expo": {
+    "name": "The BTS Network",
+    "slug": "the-bts-network",
+    "version": "1.0.0",
+    "plugins": [
+      "@react-native-community/datetimepicker",
+      "expo-mail-composer",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow BTS Network to access your photos."
+        }
+      ]
+    ]
+  }
 }

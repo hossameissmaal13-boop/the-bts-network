@@ -1,4 +1,4 @@
-const BASE_URL = "https://the-bts-network-production.up.railway.app/api";
+const BASE_URL = "https://the-bts-network-production-e3f6.up.railway.app/api";
 
 // GET ALL
 export const getLessons = async () => {

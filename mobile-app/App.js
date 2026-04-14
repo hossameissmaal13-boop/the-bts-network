@@ -22,7 +22,8 @@ import Account from "./app/Account";
 import Help from "./app/Help";
 import Report from "./app/Report";
 import Settings from "./app/Settings";
-
+import ChangePassword from "./app/ChangePassword";
+import EditAccount from "./app/EditAccount";
 import { LanguageProvider } from "./src/utils/LanguageContext";
 
 const Stack = createNativeStackNavigator();
@@ -45,7 +46,6 @@ export default function App() {
           <Stack.Screen name="Welcome" component={Welcome} />
           <Stack.Screen name="Home" component={Home} />
 
-          {/* Lessons */}
           <Stack.Screen name="Lessons" component={Lessons} />
           <Stack.Screen name="LessonsEii" component={LessonsEii} />
           <Stack.Screen name="LessonsDai" component={LessonsDai} />
@@ -54,16 +54,16 @@ export default function App() {
           <Stack.Screen name="SubjectLessons" component={SubjectLessons} />
           <Stack.Screen name="LessonDetails" component={LessonDetails} />
 
-          {/* Services */}
           <Stack.Screen name="Messages" component={Messages} />
           <Stack.Screen name="Posts" component={Posts} />
           <Stack.Screen name="Ai" component={Ai} />
 
-          {/* Other pages */}
           <Stack.Screen name="Account" component={Account} />
           <Stack.Screen name="Help" component={Help} />
           <Stack.Screen name="Report" component={Report} />
           <Stack.Screen name="Settings" component={Settings} />
+          <Stack.Screen name="ChangePassword" component={ChangePassword} />
+          <Stack.Screen name="EditAccount" component={EditAccount} />
         </Stack.Navigator>
       </NavigationContainer>
     </LanguageProvider>

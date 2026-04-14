@@ -19,7 +19,7 @@ export default function LessonContentsManager() {
   const [formData, setFormData] = useState({
     title: "",
     type: "cours",
-    content: ""
+    file: null
   });
 
   useEffect(() => {
@@ -45,9 +45,12 @@ export default function LessonContentsManager() {
     setFormData({
       title: "",
       type: "cours",
-      content: ""
+      file: null
     });
     setEditId(null);
+
+    const fileInput = document.getElementById("lesson-file-input");
+    if (fileInput) fileInput.value = "";
   };
 
   const handleSubmit = async () => {
@@ -56,16 +59,25 @@ export default function LessonContentsManager() {
       return;
     }
 
+    if (!editId && !formData.file) {
+      alert("Choisissez un fichier");
+      return;
+    }
+
     let res;
 
     if (editId) {
-      res = await updateLessonContent(editId, formData);
+      res = await updateLessonContent(editId, {
+        title: formData.title,
+        type: formData.type,
+        file: formData.file
+      });
     } else {
       res = await addLessonContent({
         lessonId: lesson._id,
         title: formData.title,
         type: formData.type,
-        content: formData.content
+        file: formData.file
       });
     }
 
@@ -82,8 +94,12 @@ export default function LessonContentsManager() {
     setFormData({
       title: item.title || "",
       type: item.type || "cours",
-      content: item.content || ""
+      file: null
     });
+
+    const fileInput = document.getElementById("lesson-file-input");
+    if (fileInput) fileInput.value = "";
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -119,7 +135,7 @@ export default function LessonContentsManager() {
               <tr style={{ background: "#2e86de", color: "#fff" }}>
                 <th style={thStyle}>Nom</th>
                 <th style={thStyle}>Type</th>
-                <th style={thStyle}>Contenu</th>
+                <th style={thStyle}>Fichier</th>
                 <th style={thStyle}>Actions</th>
               </tr>
             </thead>
@@ -134,9 +150,13 @@ export default function LessonContentsManager() {
                   <td style={tdStyle}>{item.title}</td>
                   <td style={tdStyle}>{item.type}</td>
                   <td style={tdStyle}>
-                    <div style={{ maxWidth: 280, whiteSpace: "pre-wrap" }}>
-                      {item.content || "-"}
-                    </div>
+                    {item.fileUrl ? (
+                      <a href={item.fileUrl} target="_blank" rel="noreferrer">
+                        {item.fileName || "Voir fichier"}
+                      </a>
+                    ) : (
+                      "-"
+                    )}
                   </td>
                   <td style={tdStyle}>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -159,7 +179,14 @@ export default function LessonContentsManager() {
 
   if (!lesson) {
     return (
-      <div style={{ display: "flex", flexDirection: "row-reverse", background: "#f8fafc", minHeight: "100vh" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row-reverse",
+          background: "#f8fafc",
+          minHeight: "100vh"
+        }}
+      >
         <Sidebar />
         <div style={{ flex: 1, padding: 30, marginRight: 240 }}>
           <div style={headerStyle}>
@@ -174,7 +201,14 @@ export default function LessonContentsManager() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "row-reverse", background: "#f8fafc", minHeight: "100vh" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row-reverse",
+        background: "#f8fafc",
+        minHeight: "100vh"
+      }}
+    >
       <Sidebar />
 
       <div style={{ flex: 1, padding: 30, marginRight: 240 }}>
@@ -186,6 +220,7 @@ export default function LessonContentsManager() {
           <h2 style={{ margin: "14px 0 0 0", color: "#0f172a" }}>
             📘 {lesson.title}
           </h2>
+
           <p style={{ marginTop: 8, color: "#64748b" }}>
             Filière: {lesson.filiere} | Année: {lesson.annee === "1" ? "Première année" : "Deuxième année"}
           </p>
@@ -223,14 +258,20 @@ export default function LessonContentsManager() {
             </div>
 
             <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Contenu</label>
-              <textarea
-                rows={8}
-                value={formData.content}
-                onChange={(e) => handleChange("content", e.target.value)}
-                placeholder="Écrivez ici le contenu..."
-                style={{ ...inputStyle, resize: "vertical", minHeight: 140 }}
+              <label style={labelStyle}>Fichier</label>
+              <input
+                id="lesson-file-input"
+                type="file"
+                onChange={(e) => handleChange("file", e.target.files[0])}
+                style={inputStyle}
               />
+              <p style={{ marginTop: 8, color: "#64748b", fontSize: 13 }}>
+                {formData.file
+                  ? `Fichier sélectionné: ${formData.file.name}`
+                  : editId
+                  ? "Choisissez un nouveau fichier seulement si vous voulez le remplacer."
+                  : "Choisissez un fichier à envoyer."}
+              </p>
             </div>
           </div>
 
