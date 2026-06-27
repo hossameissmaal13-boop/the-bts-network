@@ -1,6 +1,6 @@
 const Report = require('../models/reportModel');
 
-// إنشاء بلاغ
+// ✅ إنشاء بلاغ
 exports.createReport = async (req, res) => {
   try {
     const { type, targetId, reason } = req.body;
@@ -8,7 +8,7 @@ exports.createReport = async (req, res) => {
     if (!type || !reason) {
       return res.status(400).json({
         success: false,
-        message: 'Type et raison obligatoires'
+        message: "Type et raison obligatoires"
       });
     }
 
@@ -19,14 +19,17 @@ exports.createReport = async (req, res) => {
       reason
     });
 
-    return res.status(201).json({ success: true, report });
+    return res.status(201).json({
+      success: true,
+      report
+    });
   } catch (error) {
-    console.error('CREATE REPORT ERROR:', error);
-    return res.status(500).json({ success: false, message: 'Erreur serveur' });
+    console.error("CREATE REPORT ERROR:", error);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 };
 
-// جلب كل البلاغات (للأدمن)
+// ✅ جلب كل البلاغات (أدمن)
 exports.getReports = async (req, res) => {
   try {
     const reports = await Report.find()
@@ -35,11 +38,12 @@ exports.getReports = async (req, res) => {
 
     return res.json({ success: true, reports });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erreur serveur' });
+    console.error("GET REPORTS ERROR:", error);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 };
 
-// تغيير حالة البلاغ
+// ✅ تغيير حالة البلاغ (أدمن)
 exports.updateReportStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -52,11 +56,24 @@ exports.updateReportStatus = async (req, res) => {
     );
 
     if (!report) {
-      return res.status(404).json({ success: false, message: 'Rapport introuvable' });
+      return res.status(404).json({ success: false, message: "Rapport introuvable" });
     }
 
     return res.json({ success: true, report });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Erreur serveur' });
+    console.error("UPDATE REPORT ERROR:", error);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+};
+
+// ✅ حذف بلاغ (أدمن)
+exports.deleteReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Report.findByIdAndDelete(id);
+    return res.json({ success: true, message: "Rapport supprimé" });
+  } catch (error) {
+    console.error("DELETE REPORT ERROR:", error);
+    return res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 };

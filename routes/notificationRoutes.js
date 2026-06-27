@@ -7,8 +7,13 @@ const {
   deleteNotification
 } = require('../controllers/notificationController');
 
+// ✅ إرسال إشعار (أدمن فقط)
 router.post('/', sendNotification);
+
+// ✅ جلب إشعارات الطالب
 router.get('/', auth, getNotifications);
+
+// ✅ حذف إشعار
 router.delete('/:id', auth, deleteNotification);
 
 module.exports = router;

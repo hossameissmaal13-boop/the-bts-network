@@ -8,11 +8,11 @@ const {
   getGroupMessages
 } = require('../controllers/messageController');
 
-// رسائل خاصة
+// ✅ رسائل خاصة
 router.post('/private', auth, sendMessage);
 router.get('/private/:userId', auth, getPrivateMessages);
 
-// مجموعات
+// ✅ مجموعات
 router.post('/group', auth, createGroupMessage);
 router.get('/group/:groupName', auth, getGroupMessages);
 
